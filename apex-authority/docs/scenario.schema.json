@@ -1,0 +1,340 @@
+{
+  "$defs": {
+    "DecisionOption": {
+      "additionalProperties": false,
+      "properties": {
+        "option_id": {
+          "title": "Option Id",
+          "type": "string"
+        },
+        "label": {
+          "title": "Label",
+          "type": "string"
+        }
+      },
+      "required": [
+        "option_id",
+        "label"
+      ],
+      "title": "DecisionOption",
+      "type": "object"
+    },
+    "DecisionPoint": {
+      "additionalProperties": false,
+      "properties": {
+        "decision_key": {
+          "title": "Decision Key",
+          "type": "string"
+        },
+        "offset_seconds": {
+          "title": "Offset Seconds",
+          "type": "integer"
+        },
+        "prompt": {
+          "title": "Prompt",
+          "type": "string"
+        },
+        "visible_to_roles": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Visible To Roles",
+          "type": "array"
+        },
+        "options": {
+          "items": {
+            "$ref": "#/$defs/DecisionOption"
+          },
+          "title": "Options",
+          "type": "array"
+        },
+        "rationale_required": {
+          "title": "Rationale Required",
+          "type": "boolean"
+        },
+        "evaluation_criteria": {
+          "items": {
+            "$ref": "#/$defs/EvaluationCriterion"
+          },
+          "title": "Evaluation Criteria",
+          "type": "array"
+        }
+      },
+      "required": [
+        "decision_key",
+        "offset_seconds",
+        "prompt",
+        "visible_to_roles",
+        "options",
+        "rationale_required",
+        "evaluation_criteria"
+      ],
+      "title": "DecisionPoint",
+      "type": "object"
+    },
+    "Difficulty": {
+      "enum": [
+        "beginner",
+        "intermediate",
+        "advanced"
+      ],
+      "title": "Difficulty",
+      "type": "string"
+    },
+    "Domain": {
+      "enum": [
+        "land",
+        "air",
+        "cyber",
+        "electronic_warfare",
+        "joint_operations",
+        "general"
+      ],
+      "title": "Domain",
+      "type": "string"
+    },
+    "EvaluationCriterion": {
+      "additionalProperties": false,
+      "properties": {
+        "criterion_id": {
+          "title": "Criterion Id",
+          "type": "string"
+        },
+        "description": {
+          "title": "Description",
+          "type": "string"
+        },
+        "weight": {
+          "title": "Weight",
+          "type": "number"
+        },
+        "acceptable_option_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Acceptable Option Ids",
+          "type": "array"
+        },
+        "scoring_notes": {
+          "title": "Scoring Notes",
+          "type": "string"
+        }
+      },
+      "required": [
+        "criterion_id",
+        "description",
+        "weight",
+        "acceptable_option_ids",
+        "scoring_notes"
+      ],
+      "title": "EvaluationCriterion",
+      "type": "object"
+    },
+    "InitialReport": {
+      "additionalProperties": false,
+      "properties": {
+        "report_id": {
+          "title": "Report Id",
+          "type": "string"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        },
+        "content": {
+          "title": "Content",
+          "type": "string"
+        },
+        "visible_to_roles": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Visible To Roles",
+          "type": "array"
+        },
+        "source_label": {
+          "title": "Source Label",
+          "type": "string"
+        }
+      },
+      "required": [
+        "report_id",
+        "title",
+        "content",
+        "visible_to_roles",
+        "source_label"
+      ],
+      "title": "InitialReport",
+      "type": "object"
+    },
+    "Role": {
+      "additionalProperties": false,
+      "properties": {
+        "role_id": {
+          "title": "Role Id",
+          "type": "string"
+        },
+        "display_name": {
+          "title": "Display Name",
+          "type": "string"
+        },
+        "permissions": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Permissions",
+          "type": "array"
+        },
+        "briefing": {
+          "title": "Briefing",
+          "type": "string"
+        }
+      },
+      "required": [
+        "role_id",
+        "display_name",
+        "permissions",
+        "briefing"
+      ],
+      "title": "Role",
+      "type": "object"
+    },
+    "ScenarioEvent": {
+      "additionalProperties": false,
+      "properties": {
+        "event_key": {
+          "title": "Event Key",
+          "type": "string"
+        },
+        "offset_seconds": {
+          "title": "Offset Seconds",
+          "type": "integer"
+        },
+        "event_type": {
+          "title": "Event Type",
+          "type": "string"
+        },
+        "config": {
+          "additionalProperties": true,
+          "title": "Config",
+          "type": "object"
+        },
+        "description": {
+          "title": "Description",
+          "type": "string"
+        }
+      },
+      "required": [
+        "event_key",
+        "offset_seconds",
+        "event_type",
+        "config",
+        "description"
+      ],
+      "title": "ScenarioEvent",
+      "type": "object"
+    },
+    "ScenarioStatus": {
+      "enum": [
+        "draft",
+        "approved",
+        "archived"
+      ],
+      "title": "ScenarioStatus",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "format": "uuid",
+      "title": "Id",
+      "type": "string"
+    },
+    "title": {
+      "title": "Title",
+      "type": "string"
+    },
+    "description": {
+      "title": "Description",
+      "type": "string"
+    },
+    "domain": {
+      "$ref": "#/$defs/Domain"
+    },
+    "learning_objectives": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Learning Objectives",
+      "type": "array"
+    },
+    "difficulty": {
+      "$ref": "#/$defs/Difficulty"
+    },
+    "duration_minutes": {
+      "title": "Duration Minutes",
+      "type": "integer"
+    },
+    "roles": {
+      "items": {
+        "$ref": "#/$defs/Role"
+      },
+      "title": "Roles",
+      "type": "array"
+    },
+    "initial_reports": {
+      "items": {
+        "$ref": "#/$defs/InitialReport"
+      },
+      "title": "Initial Reports",
+      "type": "array"
+    },
+    "events": {
+      "items": {
+        "$ref": "#/$defs/ScenarioEvent"
+      },
+      "title": "Events",
+      "type": "array"
+    },
+    "decision_points": {
+      "items": {
+        "$ref": "#/$defs/DecisionPoint"
+      },
+      "title": "Decision Points",
+      "type": "array"
+    },
+    "instructor_notes": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Instructor Notes",
+      "type": "array"
+    },
+    "status": {
+      "$ref": "#/$defs/ScenarioStatus"
+    },
+    "schema_version": {
+      "default": "1.0",
+      "title": "Schema Version",
+      "type": "string"
+    }
+  },
+  "required": [
+    "id",
+    "title",
+    "description",
+    "domain",
+    "learning_objectives",
+    "difficulty",
+    "duration_minutes",
+    "roles",
+    "initial_reports",
+    "events",
+    "decision_points",
+    "instructor_notes",
+    "status"
+  ],
+  "title": "Scenario",
+  "type": "object"
+}
