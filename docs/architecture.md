@@ -25,3 +25,20 @@ Design rules fixed here for later modules:
 8. **Stage references**: `workflow_transitions.from_stage/to_stage` and `application_stage_history.from_stage/to_stage`
    store `stage_code` values scoped to the template (not stage row IDs).
 9. **Status changes** only through Module 1's transition endpoint; no PATCH of `applications.status/current_stage_id`.
+
+## Module 1 notes for other modules
+- `services/workflow_service.perform_transition(db, user=, application=, action=, reason=, metadata=, request_id=,
+  allow_managed=False)` is the **only** writer of `applications.status/current_stage_id/assigned_to` after creation. It
+  stages writes and does not commit. Other modules (e.g. Module 5) call it rather than updating the application row.
+- **Module 5 (EVC):** `SCHEDULE_EVC` / `COMPLETE_EVC` are refused by the public endpoint (`MANAGED_ACTIONS`). Create/update the
+  `evc_records` row and call `perform_transition(..., allow_managed=True)` in the same transaction. Completing EVC auto-routes
+  to COMMITTEE_REVIEW; it never approves.
+- **Module 4 (analytics):** `stage_entered_at` = latest `application_stage_history.created_at`; return counts = history rows
+  with `action = RETURN_FOR_DEFICIENCY`; stage SLA = `workflow_stages.default_sla_hours`.
+- **Module 3 (alerts):** transitions are audited as `entity_type="application"`, `action="APPLICATION_TRANSITION"`.
+- Automatic routing = a transition with `required_role = "SYSTEM"` (max one per from-stage). Config lives in
+  `seed/workflow_templates.py` and is stored in the workflow_* tables; re-running the seed upserts config rows but never
+  rewinds applications or touches (append-only) history.
+- Visibility: `workflow_service.application_scope_clause(user)` (lists) and `get_application_for_user(db, user, id)` (records)
+  add "drafts are institution-private" on top of Module 0's institution scope. Reuse them for anything application-scoped.
+

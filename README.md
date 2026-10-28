@@ -8,7 +8,8 @@ Prototype built from the *AICTE PS 4 Claude-Ready Prototype Build Brief* (v1.0).
 | Module | State |
 |---|---|
 | 0 — Shared foundation, DB, API contract | **Implemented (this commit)** |
-| 1–7 | Not started |
+| 1 — Applications and workflow engine | **Implemented** |
+| 2–7 | Not started |
 
 Module 0 delivers: FastAPI app under `/api/v1`, SQLAlchemy models for every shared table, standard
 response/error envelopes, request IDs, pagination, prototype demo auth, server-side role + institution/region
@@ -73,10 +74,10 @@ Seed institutions: `inst_001` (reg_central), `inst_002` (reg_west), `inst_003` (
 backend/app/core/      config, database, errors, middleware, security, permissions (scope), deps, pagination, enums
 backend/app/models/    all shared tables (identity, workflow, compliance, ops)
 backend/app/schemas/   Pydantic envelopes and DTOs
-backend/app/services/  audit_service (other services arrive with their modules)
-backend/app/routers/   health, auth, institutions
+backend/app/services/  audit_service, workflow_service, application_service (others arrive with their modules)
+backend/app/routers/   health, auth, institutions, applications, workflow
 backend/app/api/v1/    router registration (later modules add theirs here)
-backend/app/seed/      demo_data.py (idempotent)
+backend/app/seed/      demo_data.py (idempotent), workflow_templates.py (route configuration)
 backend/tests/
 docs/                  api-contract.md, architecture.md
 ```
@@ -87,3 +88,29 @@ docs/                  api-contract.md, architecture.md
 - **Known limitations:** prototype auth (no passwords); no migrations yet; audit append-only is enforced for ORM
   updates/deletes only (also revoke UPDATE/DELETE on `audit_logs` at DB level for production); out-of-scope returns
   403 while non-existent returns 404, so record existence is observable; dashboard/audit-log endpoints belong to later modules.
+
+## Module 1 README snippet — Applications and workflow engine
+- **Endpoints:** `GET/POST /applications`, `GET/PATCH /applications/{id}`, `GET /applications/{id}/history`,
+  `GET /applications/{id}/allowed-actions`, `POST /applications/{id}/transitions`, `GET /workflow-templates`
+  (details in `docs/api-contract.md`). Reuses Module 0 auth, scope helpers, envelopes, errors and `audit_service`.
+- **Files added:** `app/services/workflow_service.py`, `app/services/application_service.py`,
+  `app/routers/applications.py`, `app/routers/workflow.py`, `app/schemas/application.py`, `app/schemas/workflow.py`,
+  `app/seed/workflow_templates.py`; tests `test_workflow_engine.py`, `test_applications_api.py`,
+  `test_workflow_transitions_api.py`, `test_application_scope.py`.
+- **Files changed:** `app/core/enums.py` (additive: `WorkflowAction`, `SYSTEM_ROLE`), `app/api/v1/router.py`,
+  `app/seed/demo_data.py` (templates + 5 demo applications), docs, README. No model/column changes.
+- **Env vars:** none new. **Existing dev DB:** run `python -m app.seed.demo_data` (adds templates and demo applications;
+  no schema change, so no `--reset` needed).
+- **Demo cases:** `app_001` IN_SCRUTINY (assigned to the scrutiny officer; return-with-reason demo), `app_002`
+  RETURNED_FOR_DEFICIENCY (resubmit demo), `app_003` EVC_PENDING, `app_004` other region, `app_005` DRAFT.
+
+### Module 1 remaining gaps
+- No reassign endpoint (regional-officer reassignment is not in the endpoint catalogue); assignment is automatic only.
+- EVC actions are deliberately refused on the generic endpoint until Module 5 wires `evc_records` (see architecture notes).
+- No document upload yet (Module 2): resubmission can *reference* existing `documents` rows via `metadata.document_ids`,
+  but evidence is optional and submission does not validate a required-document checklist.
+- `PATCH` edits only `category` (DRAFT only): the shared `applications` table has no other editable columns.
+- Stage due date comes from `default_sla_hours` (demo values); no `overdue_only` / `due_before` filters here (Module 4).
+- Template/rule editing (admin screen) is P1 and not built; edit `seed/workflow_templates.py` and re-seed.
+- History has no sequence column: ordering within one request is guaranteed by a strictly increasing clock; across
+  requests it relies on timestamps.

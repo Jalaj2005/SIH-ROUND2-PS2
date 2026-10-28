@@ -100,3 +100,29 @@ class NotificationStatus(StrEnum):
 class EscalationStatus(StrEnum):
     OPEN = "OPEN"
     RESOLVED = "RESOLVED"
+
+# ---- Added in Module 1 (additive; no existing value changed) -------------------------------------
+
+SYSTEM_ROLE = "SYSTEM"
+"""Pseudo-role used in workflow_transitions.required_role for steps the engine performs by itself
+(automatic routing). No user ever has this role, so clients can never invoke such a step."""
+
+
+class WorkflowAction(StrEnum):
+    """Action codes used in workflow_transitions.action / application_stage_history.action.
+    Prototype examples, not official AICTE labels."""
+    CREATE = "CREATE"                                # history-only: draft created
+    SUBMIT = "SUBMIT"
+    ROUTE_TO_SCRUTINY = "ROUTE_TO_SCRUTINY"          # SYSTEM
+    RETURN_FOR_DEFICIENCY = "RETURN_FOR_DEFICIENCY"
+    RESUBMIT = "RESUBMIT"
+    ROUTE_TO_RE_SCRUTINY = "ROUTE_TO_RE_SCRUTINY"    # SYSTEM
+    COMPLETE_SCRUTINY = "COMPLETE_SCRUTINY"
+    SCHEDULE_EVC = "SCHEDULE_EVC"                    # managed by Module 5
+    COMPLETE_EVC = "COMPLETE_EVC"                    # managed by Module 5
+    ROUTE_TO_COMMITTEE = "ROUTE_TO_COMMITTEE"        # SYSTEM
+    FORWARD_TO_AUTHORITY = "FORWARD_TO_AUTHORITY"
+    RECORD_APPROVAL = "RECORD_APPROVAL"              # human-recorded outcome; never AI-generated
+    RECORD_REJECTION = "RECORD_REJECTION"
+    CLOSE = "CLOSE"
+    WITHDRAW = "WITHDRAW"
